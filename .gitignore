@@ -54,3 +54,12 @@ dkms.conf
 .metadata/
 RemoteSystemsTempFiles/
 embeded-system-2/
+lab1/
+.settings/
+.cproject
+.project
+startup/
+Debug/
+*.ld
+*.xml
+*.cfg
