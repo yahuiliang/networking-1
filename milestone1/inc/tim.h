@@ -116,6 +116,7 @@ typedef struct
 #define UIE     0
 #define CC1IE   1
 // SR bits
+#define UIF     0
 #define CC1IF   1
 
 /**
@@ -162,6 +163,8 @@ void enable_counter_mode_interrupt(enum TIMs tim);
 
 void disable_counter_mode_interrupt(enum TIMs tim);
 
+void clear_counter_mode_pending_flag(enum TIMs tim);
+
 /*********************************************************/
 
 /*********This section is for input capture mode**********/
@@ -194,11 +197,6 @@ void enable_output_output_cmp_mode(enum TIMs tim);
 void disable_output_output_cmp_mode(enum TIMs tim);
 
 /**
- * Clears the pending flag for the interrupt.
- */
-void clear_output_cmp_mode_pending_flag(enum TIMs tim);
-
-/**
  * Enables the update event interrupt.
  */
 void enable_output_cmp_mode_interrupt(enum TIMs tim);
@@ -207,6 +205,11 @@ void enable_output_cmp_mode_interrupt(enum TIMs tim);
  * Disables the update event interrupt.
  */
 void disable_output_cmp_mode_interrupt(enum TIMs tim);
+
+/**
+ * Clears the pending flag for the interrupt.
+ */
+void clear_output_cmp_mode_pending_flag(enum TIMs tim);
 
 /********************************************************/
 

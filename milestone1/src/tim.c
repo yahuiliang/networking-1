@@ -77,6 +77,21 @@ void set_arr(enum TIMs tim, uint32_t ticks)
     }
 }
 
+void clear_cnt(enum TIMs tim)
+{
+    switch (tim)
+    {
+    case TIM2:
+        TIM2_BASE->CNT = 0;
+        break;
+    case TIM3:
+        TIM3_BASE->CNT = 0;
+        break;
+    default:
+        break;
+    }
+}
+
 void set_psc(enum TIMs tim, uint32_t ticks)
 {
     switch (tim)
@@ -104,9 +119,6 @@ void log_tim_interrupt(enum TIMs tim)
         break;
     case TIM3:
         *ISER0 |= 1 << TIM3_INTERRUPT_EN;
-        break;
-    case TIM9:
-        *ISER0 |= 1 << TIM9_INTERRUPT_EN;
         break;
     default:
         break;
@@ -190,6 +202,21 @@ void disable_counter_mode_interrupt(enum TIMs tim)
         break;
     case TIM3:
         TIM3_BASE->DIER &= ~(1 << UIE);
+        break;
+    default:
+        break;
+    }
+}
+
+void clear_counter_mode_pending_flag(enum TIMs tim)
+{
+    switch (tim)
+    {
+    case TIM2:
+        TIM2_BASE->SR &= ~(1 << UIF);
+        break;
+    case TIM3:
+        TIM3_BASE->SR &= ~(1 << UIF);
         break;
     default:
         break;
@@ -326,10 +353,10 @@ void clear_output_cmp_mode_pending_flag(enum TIMs tim)
     switch (tim)
     {
     case TIM2:
-        TIM2_BASE->SR &= ~1;
+        TIM2_BASE->SR &= ~(1 << UIF);
         break;
     case TIM3:
-        TIM3_BASE->SR &= ~1;
+        TIM3_BASE->SR &= ~(1 << UIF);
         break;
     default:
         break;
