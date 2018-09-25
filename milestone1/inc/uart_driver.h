@@ -8,11 +8,8 @@
 #ifndef UART_DRIVER_H_
 #define UART_DRIVER_H_
 
+#include "clock.h"
 #include <inttypes.h>
-
-// RCC registers
-#define RCC_APB1ENR (volatile uint32_t*) 0x40023840
-#define RCC_AHB1ENR (volatile uint32_t*) 0x40023830
 
 #define GPIOAEN 0		// GPIOA Enable is bit 0 in RCC_APB1LPENR
 #define USART2EN 17  // USART2 enable is bit 17 in RCC_AHB1LPENR

@@ -1,0 +1,13 @@
+/*
+ * manchester_encode.h
+ *
+ *  Created on: Sep 25, 2018
+ *      Author: liangy
+ */
+
+#ifndef MANCHESTER_ENCODE_H_
+#define MANCHESTER_ENCODE_H_
+
+void configure_timeout_clk();
+
+#endif /* MANCHESTER_ENCODE_H_ */
