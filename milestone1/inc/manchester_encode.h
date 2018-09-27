@@ -8,6 +8,9 @@
 #ifndef MANCHESTER_ENCODE_H_
 #define MANCHESTER_ENCODE_H_
 
-void configure_timeout_clk();
+enum states
+{
+    IDLE, BUSY, COLLISION
+};
 
 #endif /* MANCHESTER_ENCODE_H_ */

@@ -20,4 +20,8 @@ void light_LED_init();
  */
 void light_LED(uint16_t number);
 
+void led_on(uint32_t led_num);
+
+void led_off(uint32_t led_num);
+
 #endif /* LED_H_ */

@@ -277,7 +277,9 @@ void clear_input_capture_mode_pending_flag(enum TIMs tim)
     switch (tim)
     {
     case TIM2:
-        TIM2_BASE->SR &= ~(1 << CC1IF);
+//        TIM2_BASE->SR &= ~(1 << CC1IF);
+
+        TIM2_BASE->SR = 0;
         break;
     case TIM3:
         TIM3_BASE->SR &= ~(1 << CC1IF);

@@ -15,8 +15,6 @@
 #define USART2EN 17  // USART2 enable is bit 17 in RCC_AHB1LPENR
 
 // GPIOA registers
-#define GPIOA_MODER (volatile uint32_t*) 0x40020000
-#define GPIOA_AFRL  (volatile uint32_t*) 0x40020020
 #define USART_SR    (volatile uint32_t*) 0x40004400
 #define USART_DR    (volatile uint32_t*) 0x40004404
 #define USART_BRR   (volatile uint32_t*) 0x40004408
