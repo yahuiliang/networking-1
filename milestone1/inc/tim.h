@@ -29,6 +29,11 @@ enum TIMs
     TIM14
 };
 
+enum EDGE_TYPEs
+{
+    RISING, FALLING, BOTH
+};
+
 /* The structure for TIMER2 to 5 */
 typedef struct
 {

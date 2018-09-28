@@ -18,5 +18,6 @@ int main()
     light_LED_init();
     manchester_init();
     // Keep looping in the end
-    while (1);
+    while (1)
+        ;
 }

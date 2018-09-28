@@ -14,7 +14,8 @@
 
 static void output_cmp_mode(volatile uint32_t *CCMR1);
 static void input_capture_mode(volatile uint32_t *CCMR1,
-        volatile uint32_t *CCER);
+        volatile uint32_t *CCER, enum EDGE_TYPEs edge_type);
+static void set_edge_type(volatile uint32_t *CCER, enum EDGE_TYPEs edge_type);
 
 /**
  * Configure the clock for the timer.
@@ -232,10 +233,10 @@ void set_to_input_capture_mode(enum TIMs tim)
     switch (tim)
     {
     case TIM2:
-        input_capture_mode(&(TIM2_BASE->CCMR1), &(TIM2_BASE->CCER));
+        input_capture_mode(&(TIM2_BASE->CCMR1), &(TIM2_BASE->CCER), BOTH);
         break;
     case TIM3:
-        input_capture_mode(&(TIM3_BASE->CCMR1), &(TIM3_BASE->CCER));
+        input_capture_mode(&(TIM3_BASE->CCMR1), &(TIM3_BASE->CCER), BOTH);
         break;
     default:
         break;
@@ -277,9 +278,7 @@ void clear_input_capture_mode_pending_flag(enum TIMs tim)
     switch (tim)
     {
     case TIM2:
-//        TIM2_BASE->SR &= ~(1 << CC1IF);
-
-        TIM2_BASE->SR = 0;
+        TIM2_BASE->SR &= ~(1 << CC1IF);
         break;
     case TIM3:
         TIM3_BASE->SR &= ~(1 << CC1IF);
@@ -410,18 +409,31 @@ static void output_cmp_mode(volatile uint32_t *CCMR1)
 }
 
 static void input_capture_mode(volatile uint32_t *CCMR1,
-        volatile uint32_t *CCER)
+        volatile uint32_t *CCER, enum EDGE_TYPEs edge_type)
 {
     // Configure the channel to be input
     *CCMR1 &= ~(0b11 << CC1S);
     *CCMR1 |= 0b01 << CC1S;
-    // Triggers on both edges
-    *CCER &= ~(1 << CC1P);
-    *CCER |= 1 << CC1P;
-    *CCER &= ~(1 << CC1NP);
-    *CCER |= 1 << CC1NP;
+    // Set the edge type to be both by default
+    set_edge_type(CCER, BOTH);
     // Make sure the capture is done each time an edge is detected
     *CCMR1 &= ~(0b11 << IC1PSC);
     // This bit makes the counter value to be in the capture register
     *CCER |= 1 << CC1E;
+}
+
+static void set_edge_type(volatile uint32_t *CCER, enum EDGE_TYPEs edge_type)
+{
+    switch (edge_type)
+    {
+    case BOTH:
+        // Triggers on both edges
+        *CCER &= ~(1 << CC1P);
+        *CCER |= 1 << CC1P;
+        *CCER &= ~(1 << CC1NP);
+        *CCER |= 1 << CC1NP;
+        break;
+    default:
+        break;
+    }
 }

@@ -38,6 +38,9 @@ typedef struct {
 #define GPIOA_BASE ((volatile GPIO *) 0x40020000)
 #define GPIOB_BASE ((volatile GPIO *) 0x40020400)
 
+// IDR bits
+#define IDR5 5
+
 void init_GPIO(enum GPIOs gpio);
 void enable_af_mode(enum GPIOs gpio, int pin, int af_num);
 

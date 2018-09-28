@@ -10,61 +10,30 @@
 #include "led.h"
 #include "gpio.h"
 
-#define DOWN_SCALE   1000
-#define TIME_OUT     16000
+#define DOWN_SCALE   0   // ori-val: 1000
+#define TIME_OUT     17760  // ori-val: 16000
 #define TIME_OUT_CLK TIM2
-#define MIN_TIM_GAP  12
+#define MIN_TIM_GAP  8880
 
-static void configure_timeout_clk();
+static void configure_input_capture_clk();
 static void handle_edge_detection();
 static void handle_timeout();
+static void idle_light_on();
+static void collision_light_on();
+static void busy_light_on();
+static void lights_off();
+static void enter_IDLE();
+static void enter_BUSY();
+static void enter_COLLISION();
 
 void manchester_init()
 {
+    enter_IDLE();
     enable_af_mode(A, 5, 1);
-    configure_timeout_clk();
+    configure_input_capture_clk();
 }
 
-#define BUFF_SIZE 100
-
-static volatile enum states state_buffer[BUFF_SIZE] = {IDLE};
-static volatile int state_count = 0;
-static volatile int push_index = 0;
-static volatile int pop_index = 0;
-
-void read_encode()
-{
-    while (1) // TODO: the terminate condition should be changed
-    {
-        enum states state = IDLE;
-        // update the state buffer
-        if (state_count > 0)
-        {
-            state = state_buffer[pop_index++];
-            if (pop_index >= BUFF_SIZE)
-            {
-                pop_index = 0;
-            }
-            --state_count;
-        }
-
-        // TODO: implement the state machine
-        switch (state)
-        {
-        case IDLE:
-            break;
-        case BUSY:
-            break;
-        case COLLISION:
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-volatile int tmp1 = 0;
-volatile int tmp2 = 0;
+volatile TIMER2to5 *reg = TIM2_BASE;
 
 void TIM2_IRQHandler(void)
 {
@@ -77,97 +46,134 @@ void TIM2_IRQHandler(void)
     }
     else if (TIM2_BASE->SR & (1 << CC1IF))
     {
-        /***************** The edge is detected ******************/
+        /***************** The edge is detected *********************/
         clear_input_capture_mode_pending_flag(TIM2);
         handle_edge_detection();
     }
-    TIM2_BASE->CNT = 0; // resets the count value to zero
+    TIM2_BASE->CNT = 0;
+    TIM2_BASE->CCR1 = 0;
     start_counter(TIM2);
 }
 
-static void configure_timeout_clk()
+static void configure_input_capture_clk()
 {
     enable_timer_clk(TIME_OUT_CLK);
 
     set_to_input_capture_mode(TIME_OUT_CLK);
-    set_to_counter_mode(TIME_OUT_CLK);
     set_psc(TIME_OUT_CLK, DOWN_SCALE);
     set_arr(TIME_OUT_CLK, TIME_OUT);
 
     log_tim_interrupt(TIME_OUT_CLK);
 
     enable_input_capture_mode_interrupt(TIME_OUT_CLK);
-    enable_counter_mode_interrupt(TIME_OUT_CLK);
     TIM2_BASE->CNT = 0;
     start_counter(TIME_OUT_CLK);
 }
 
+volatile int tmp1 = 0;
+volatile int tmp2 = 0;
+
+volatile enum states state = IDLE;
+
 static void handle_edge_detection()
 {
-    // TODO: fill out the logic for entering state BUSY/COLLISION
-    enum states state;
-    if (TIM2_BASE->CCR1 > MIN_TIM_GAP)
+    switch (state)
     {
-        // valid data
-        state = BUSY;
+    case IDLE:
+        enter_BUSY();
+        break;
+    default:
+        enter_BUSY();
+        break;
     }
-    else
-    {
-        // invalid data
-        state = COLLISION;
-    }
-
     // The LED light for showing the timer is triggered
-    if (tmp2)
-    {
-        led_on(1);
-        tmp2 = 0;
-    }
-    else
-    {
-        led_off(1);
-        tmp2 = 1;
-    }
-
-    // update the state buffer
-    if (state_count < BUFF_SIZE)
-    {
-        state_buffer[push_index++] = state;
-        if (push_index >= BUFF_SIZE)
-        {
-            push_index = 0;
-        }
-        ++state_count;
-    }
+//    if (tmp2)
+//    {
+//        led_on(1);
+//        tmp2 = 0;
+//    }
+//    else
+//    {
+//        led_off(1);
+//        tmp2 = 1;
+//    }
 }
 
 static void handle_timeout()
 {
-    // TODO: fill out the logic for entering state COLLISION
-    enum states state;
-    state = COLLISION;
-
-    // The LED light for showing the timer is triggered
-    if (tmp1)
+    switch (state)
     {
-        led_on(0);
-        tmp1 = 0;
-    }
-    else
-    {
-        led_off(0);
-        tmp1 = 1;
-    }
-
-    // update the state buffer
-    if (state_count < BUFF_SIZE)
-    {
-        state_buffer[push_index++] = state;
-        if (push_index >= BUFF_SIZE)
+    case BUSY:
+        if (GPIOA_BASE->IDR & (1 << IDR5)) // When the voltage is high
         {
-            push_index = 0;
+            enter_IDLE();
         }
-        ++state_count;
+        else                               // When the voltage is low
+        {
+            enter_COLLISION();
+        }
+        break;
+    default:
+        break;
     }
+    // The LED light for showing the timer is triggered
+//    if (tmp1)
+//    {
+//        led_on(0);
+//        tmp1 = 0;
+//    }
+//    else
+//    {
+//        led_off(0);
+//        tmp1 = 1;
+//    }
+}
+
+static void lights_off()
+{
+    for (int i = 0; i < 10; ++i)
+    {
+        led_off(i);
+    }
+}
+
+static void enter_IDLE()
+{
+    state = IDLE;
+    disable_counter_mode_interrupt(TIME_OUT_CLK);
+    lights_off();
+    idle_light_on();
+}
+
+static void enter_BUSY()
+{
+    state = BUSY;
+    set_to_counter_mode(TIME_OUT_CLK);
+    enable_counter_mode_interrupt(TIME_OUT_CLK);
+    lights_off();
+    busy_light_on();
+}
+
+static void enter_COLLISION()
+{
+    state = COLLISION;
+    disable_counter_mode_interrupt(TIME_OUT_CLK);
+    lights_off();
+    collision_light_on();
+}
+
+static void collision_light_on()
+{
+    led_on(5);
+}
+
+static void busy_light_on()
+{
+    led_on(9);
+}
+
+static void idle_light_on()
+{
+    led_on(0);
 }
 

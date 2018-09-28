@@ -13,4 +13,6 @@ enum states
     IDLE, BUSY, COLLISION
 };
 
+void manchester_init();
+
 #endif /* MANCHESTER_ENCODE_H_ */
