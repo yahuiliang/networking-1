@@ -11,6 +11,7 @@
 #include "clock.h"
 #include <inttypes.h>
 
+// Enumerators for indicating timers
 enum TIMs
 {
     TIM1,
@@ -29,6 +30,7 @@ enum TIMs
     TIM14
 };
 
+// Edge types
 enum EDGE_TYPEs
 {
     RISING, FALLING, BOTH
@@ -125,14 +127,13 @@ typedef struct
 #define CC1IF   1
 
 /**
- * Configure the clock for the timer.
+ * Enable the system clock for one timer
  */
 void enable_timer_clk(enum TIMs tim);
 
 /**
- * Sets the value in CCR1.
- * Args:
- * ticks: the number of ticks needs to be set in CCR1.
+ * Sets the value for CCR1 register
+ *
  */
 void set_ccr1(enum TIMs tim, uint32_t ticks);
 

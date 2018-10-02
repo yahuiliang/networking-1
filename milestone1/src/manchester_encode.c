@@ -10,10 +10,11 @@
 #include "led.h"
 #include "gpio.h"
 
-#define DOWN_SCALE   0   // ori-val: 1000
-#define TIME_OUT     17760  // ori-val: 16000
-#define TIME_OUT_CLK TIM2
-#define MIN_TIM_GAP  8880
+#define DOWN_SCALE              0
+#define DEFAULT_TIME_OUT        17760
+#define TIME_OUT_COLLISION      17120
+#define TIME_OUT_IDLE           17120
+#define TIME_OUT_CLK            TIM2
 
 static void configure_input_capture_clk();
 static void handle_edge_detection();
@@ -34,6 +35,7 @@ void manchester_init()
 }
 
 volatile TIMER2to5 *reg = TIM2_BASE;
+volatile int prev_logic = 0;
 
 void TIM2_IRQHandler(void)
 {
@@ -53,6 +55,7 @@ void TIM2_IRQHandler(void)
     TIM2_BASE->CNT = 0;
     TIM2_BASE->CCR1 = 0;
     start_counter(TIM2);
+    prev_logic = GPIOA_BASE->IDR & (1 << IDR5);
 }
 
 static void configure_input_capture_clk()
@@ -61,7 +64,7 @@ static void configure_input_capture_clk()
 
     set_to_input_capture_mode(TIME_OUT_CLK);
     set_psc(TIME_OUT_CLK, DOWN_SCALE);
-    set_arr(TIME_OUT_CLK, TIME_OUT);
+    set_arr(TIME_OUT_CLK, DEFAULT_TIME_OUT);
 
     log_tim_interrupt(TIME_OUT_CLK);
 
@@ -104,7 +107,7 @@ static void handle_timeout()
     switch (state)
     {
     case BUSY:
-        if (GPIOA_BASE->IDR & (1 << IDR5)) // When the voltage is high
+        if (prev_logic) // When the voltage is high
         {
             enter_IDLE();
         }
@@ -148,6 +151,15 @@ static void enter_IDLE()
 static void enter_BUSY()
 {
     state = BUSY;
+    if (prev_logic) // When the voltage is high
+    {
+        // IDLE
+        set_arr(TIM2, TIME_OUT_IDLE);
+    }
+    else // When the voltage is low
+    {
+        set_arr(TIM2, TIME_OUT_COLLISION);
+    }
     set_to_counter_mode(TIME_OUT_CLK);
     enable_counter_mode_interrupt(TIME_OUT_CLK);
     lights_off();
