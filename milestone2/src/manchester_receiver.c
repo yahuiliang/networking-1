@@ -5,7 +5,7 @@
  *      Author: liangy
  */
 
-#include "manchester_encode.h"
+#include "manchester.h"
 #include "tim.h"
 #include "led.h"
 #include "gpio.h"
@@ -27,14 +27,13 @@ static void enter_IDLE();
 static void enter_BUSY();
 static void enter_COLLISION();
 
-void manchester_init()
+void init_receiver()
 {
     enter_IDLE();
     enable_af_mode(A, 5, 1);
     configure_input_capture_clk();
 }
 
-volatile TIMER2to5 *reg = TIM2_BASE;
 volatile int prev_logic = 0;
 
 void TIM2_IRQHandler(void)

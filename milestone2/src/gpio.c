@@ -16,6 +16,27 @@ void init_GPIO(enum GPIOs gpio)
         // Enable the clock for the GPIO port
         *RCC_AHB1ENR |= 1 << GPIOA_EN;
         break;
+    case B:
+        // Enable the clock for the GPIO port
+        *RCC_AHB1ENR |= 1 << GPIOB_EN;
+        break;
+    default:
+        break;
+    }
+}
+
+void enable_output_mode(enum GPIOs gpio, int pin)
+{
+    switch (gpio)
+    {
+    case A:
+        GPIOA_BASE->MODER &= ~(0b11 << pin);
+        GPIOA_BASE->MODER |= 1 << pin;
+        break;
+    case B:
+        GPIOB_BASE->MODER &= ~(0b11 << pin);
+        GPIOB_BASE->MODER |= 1 << pin;
+        break;
     default:
         break;
     }

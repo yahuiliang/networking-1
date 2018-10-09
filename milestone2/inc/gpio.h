@@ -12,14 +12,12 @@
 
 enum GPIOs
 {
-    A,
-    B,
-    C,
-    D
+    A, B, C, D
 };
 
 /* GPIO structure */
-typedef struct {
+typedef struct
+{
     uint32_t MODER;
     uint32_t OTYPER;
     uint32_t OSPEEDR;
@@ -33,6 +31,7 @@ typedef struct {
 } GPIO;
 
 #define GPIOA_EN 0
+#define GPIOB_EN 1
 
 // Base addresses
 #define GPIOA_BASE ((volatile GPIO *) 0x40020000)
@@ -40,8 +39,13 @@ typedef struct {
 
 // IDR bits
 #define IDR5 5
+// ODR bits
+#define ODR5 5
+// MODER bits
+#define MODER5 10
 
 void init_GPIO(enum GPIOs gpio);
+void enable_output_mode(enum GPIOs gpio, int pin);
 void enable_af_mode(enum GPIOs gpio, int pin, int af_num);
 
 #endif /* GPIO_H_ */
