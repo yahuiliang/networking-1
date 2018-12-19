@@ -8,8 +8,7 @@
 #include "manchester.h"
 #include "gpio.h"
 #include "delay.h"
-
-// TODO: Please use PB6 for the receiver
+#include <stdio.h>
 
 static void transmitBit(int bit);
 

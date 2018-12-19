@@ -20,35 +20,36 @@ static RingBuffer msg_buffer = {0, 0};
 int main()
 {
     light_LED_init();
-    init_transmitter();
+//    init_transmitter();
     init_receiver();
-    init_usart2(19200, F_CPU);
-    while (1)
-    {
-        char ch = usart2_getch();
-        switch (ch)
-        {
-        case '\r':
-            printf("\n");
-            if (state == IDLE)
-            {
-//                put(&msg_buffer, '\r');
-//                put(&msg_buffer, '\n');
-                while (hasElement(&msg_buffer))
-                { //Transmits all characters in buffer till its empty
-                    ch = get(&msg_buffer);
-                    transmitCharacter(ch);
-                }
-            }
-            clear_buf(&msg_buffer); // clear the message in the memory
-            break;
-        default:
-            if (state == IDLE)
-            {
-                printf("%c", ch);
-                put(&msg_buffer, ch);
-            }
-            break;
-        }
-    }
+//    init_usart2(19200, F_CPU);
+//    while (1)
+//    {
+//        char ch = usart2_getch();
+//        switch (ch)
+//        {
+//        case '\r':
+//            printf("\n");
+//            if (state == IDLE)
+//            {
+////                put(&msg_buffer, '\r');
+////                put(&msg_buffer, '\n');
+//                while (hasElement(&msg_buffer))
+//                { //Transmits all characters in buffer till its empty
+//                    ch = get(&msg_buffer);
+//                    transmitCharacter(ch);
+//                }
+//                transmit_IDLE();
+//            }
+//            clear_buf(&msg_buffer); // clear the message in the memory
+//            break;
+//        default:
+//            if (state == IDLE)
+//            {
+//                printf("%c", ch);
+//                put(&msg_buffer, ch);
+//            }
+//            break;
+//        }
+//    }
 }
